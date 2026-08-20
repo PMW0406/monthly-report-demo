@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>월간 재무보고</title>
+<style>
+html{color-scheme:light;-webkit-text-size-adjust:100%}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Pretendard','Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#f4f6f9;color:#1c2534;font-size:14px}
+#side{position:fixed;top:0;left:0;bottom:0;width:224px;background:#0f2544;color:#c9d6e6;display:flex;flex-direction:column;z-index:50}
+#main{margin-left:224px;min-height:100vh;display:flex;flex-direction:column}
+.brand{padding:20px 20px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
+.brand b{display:block;color:#fff;font-size:16px;letter-spacing:-.02em}
+.brand small{color:#7d94b0;font-size:11px}
+.nav{flex:1;padding:10px;overflow-y:auto}
+.nav .grp{font-size:10px;font-weight:700;letter-spacing:.12em;color:#5f7791;margin:14px 10px 5px}
+.nav a{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:8px;font-size:13px;color:#c9d6e6;cursor:pointer;margin-bottom:1px}
+.nav a:hover{background:rgba(255,255,255,.06)}
+.nav a.on{background:#2563eb;color:#fff;font-weight:600}
+.side-foot{padding:12px 20px;border-top:1px solid rgba(255,255,255,.08);font-size:10.5px;color:#5f7791;line-height:1.6}
+.topbar{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.92);backdrop-filter:blur(6px);border-bottom:1px solid #e3e9f1;padding:13px 26px;display:flex;align-items:flex-end;gap:14px}
+.topbar h1{margin:0;font-size:18px;font-weight:800;letter-spacing:-.02em}
+.topbar .sub{font-size:12px;color:#7183a0;padding-bottom:1px}
+.topbar .right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.mon{background:#eef3fa;border:1px solid #d5e0ef;border-radius:8px;padding:6px 12px;font-size:12.5px;font-weight:700;color:#1e3a5f}
+.pbtn{background:#fff;border:1px solid #d5dee9;border-radius:8px;padding:6px 12px;font-size:12px;color:#475569;cursor:pointer}
+.pbtn:hover{background:#f2f6fb}
+.wrap{flex:1;padding:20px 26px 48px;max-width:1240px;width:100%}
+.page{display:none}.page.on{display:block}
+.card{background:#fff;border:1px solid #e2e8f1;border-radius:12px;padding:18px 20px;margin-bottom:16px;box-shadow:0 1px 2px rgba(15,37,68,.04)}
+.card h2{margin:0 0 4px;font-size:15px;font-weight:800;letter-spacing:-.01em}
+.card .desc{font-size:12px;color:#7183a0;margin-bottom:12px}
+.hl{background:#f0f6ff;border:1px solid #d3e3fb;border-radius:10px;padding:12px 16px;font-size:13.5px;margin-bottom:16px;line-height:1.7}
+.hl b{color:#1d4ed8}
+.kgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:#fff;border:1px solid #e2e8f1;border-radius:12px;padding:14px 16px}
+.kpi .l{font-size:11.5px;font-weight:700;color:#7183a0}
+.kpi .v{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:3px 0 2px;white-space:nowrap}
+.kpi .s{font-size:11.5px;color:#8fa0b8}
+.up{color:#16a34a}.dn{color:#dc2626}
+table.t{width:100%;border-collapse:collapse;font-size:12.5px}
+.t th{background:#f6f8fb;color:#5b6b82;font-weight:700;padding:7px 9px;border-bottom:1px solid #e2e8f1;text-align:right;white-space:nowrap}
+.t th:first-child,.t td:first-child{text-align:left}
+.t td{padding:6px 9px;border-bottom:1px solid #f0f3f8;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.t tr.sec>td{background:#fbfcfe;font-weight:800}
+.t tr.sub>td:first-child{padding-left:22px;color:#475569}
+.t tr:hover td{background:#f8fafd}
+.neg{color:#dc2626}
+.tot td{border-top:2px solid #d7dfea;font-weight:800;background:#fbfcfe}
+.note{font-size:11.5px;color:#8797ad;line-height:1.7;margin-top:10px}
+.note b{color:#5b6b82}
+.tscroll{overflow-x:auto}
+.tabrow{display:flex;gap:6px;margin-bottom:14px}
+.tab{border:1px solid #d5dee9;background:#fff;border-radius:8px;padding:7px 16px;font-size:12.5px;font-weight:600;color:#475569;cursor:pointer}
+.tab.on{background:#1e3a5f;border-color:#1e3a5f;color:#fff}
+.duo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.mini{display:flex;align-items:flex-end;gap:14px;height:126px;padding:6px 4px 0}
+.mini .mcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.mini .bars{width:100%;display:flex;align-items:flex-end;justify-content:center;gap:5px;height:92px}
+.mini .b{width:26px;border-radius:3px 3px 0 0}
+.mini .lb{font-size:11px;color:#7183a0;font-weight:600}
+.mini .vv{font-size:11px;font-weight:800;color:#1e3a5f;white-space:nowrap}
+.lgd{font-size:11px;color:#94a3b8;align-self:flex-start;padding-top:4px;line-height:1.7}
+.lgd i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px}
+@media print{#side,.topbar .right{display:none}#main{margin-left:0}.page{display:block!important;page-break-after:always}body{background:#fff}.card{box-shadow:none;break-inside:avoid}}
+@media(max-width:900px){#side{transform:translateX(-100%)}#main{margin-left:0}.kgrid{grid-template-columns:repeat(2,minmax(0,1fr))}.duo{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<aside id="side">
+  <div class="brand"><b id="bd-title">월간 재무보고</b><small id="bd-org"></small></div>
+  <nav class="nav" id="nav"></nav>
+  <div class="side-foot"><span id="foot-basis"></span><br><span id="foot-conf"></span></div>
+</aside>
+<div id="main">
+  <div class="topbar">
+    <h1 id="pg-title"></h1><span class="sub" id="hd-sub"></span>
+    <div class="right"><span class="mon" id="hd-period"></span><button class="pbtn" onclick="window.print()">🖨 인쇄 / PDF</button></div>
+  </div>
+  <div class="wrap" id="wrap"></div>
+</div>
+<script>
+'use strict';
+/* ══════════════════════════════════════════════════════════════════
+   범용 재무보고 렌더러 — 화면 구조를 코드가 아니라 데이터(JSON)가 정의한다.
+   회사·보고서 양식이 바뀌어도 JSON만 갈아끼우면 되고, 코드는 그대로 쓴다.
+
+   섹션 타입: hl(강조문) · kpi(카드) · table(표) · bars(막대) · duo(2열) · tabs(탭)
+   자세한 스키마는 README.md 참조.
+   ══════════════════════════════════════════════════════════════════ */
+const DATA = /*__DATA__*/{"meta":{"title":"월간 경영회의 재무보고","org":"재무팀 · 데모","period":"2026-06","subtitle":"데모 · 모든 수치는 임의로 만든 가상 데이터입니다","basis":"데모 데이터 (실제 회사·실적과 무관)","confidential":"DEMO — 가상 데이터"},"menu":[{"group":"손익","id":"dash","label":"요약 대시보드","icon":"📊"},{"id":"pl","label":"연결 손익","icon":"🧾"},{"id":"prod","label":"제품군별 손익","icon":"🧪"},{"id":"corp","label":"법인별 손익","icon":"🌎"},{"id":"cost","label":"비용 (제조·판관)","icon":"💸"},{"group":"재무","id":"cash","label":"자금 현황·집행","icon":"🏦"},{"id":"inv","label":"재고자산","icon":"📦"},{"id":"ar","label":"채권 · 채무","icon":"📑"}],"pages":{"dash":[{"type":"hl","html":"2분기 <b>연결 매출 428억</b>(전년 390억) · <b>영업이익 71억</b>(전년 52억). 연간 계획 <b>매출 1,820억 / 영업이익 305억</b> — 누적 매출 812억(44.6%) · 영업이익 132억(43.3%)."},{"type":"kpi","items":[{"l":"2Q 연결 매출","v":"428억","sHtml":"전년 390억 <b class=\"up\">▲38억</b>"},{"l":"2Q 연결 영업이익","v":"71억","sHtml":"전년 52억 <b class=\"up\">▲19억</b> · 이익률 16.6%"},{"l":"연간 계획 진행률","v":"44.6%","s":"매출 812/1,820억 · 영업익 132/305억"},{"l":"자금 보유","v":"1,240억","s":"원화 380 + 외화 860"}]},{"type":"kpi","items":[{"l":"재고자산 (실질)","v":"246억","s":"총 556억 · 충당금 302억"},{"l":"매출채권","v":"276억","s":"해외 184 · 국내 92 · 충당 21억"},{"l":"주요 채무 (AP)","v":"43.2억","s":"외상매입 + 미지급"},{"l":"월 비용 (제조+판관연구)","v":"40.7억","s":"제조 20.2 + 판관·연구 20.5"}]},{"type":"duo","left":[{"type":"bars","title":"분기 월별 실적","desc":"단위: 억원 · 매출 / 영업이익","legend":["매출","영업이익"],"colors":["#2563eb","#16a34a"],"series":[["4월",132,21],["5월",149,26],["6월(E)",147,24]]}],"right":[{"type":"table","title":"부문별 2Q 영업이익 기여","desc":"단위: 억원","head":["부문","매출","영업이익","전년 영업익"],"rows":[{"c":["진단사업부",246,62,71]},{"c":["바이오소재",133,17,-5]},{"c":["미국법인",54,-4,-11]},{"c":["중국법인",21,2,-1]},{"c":["베트남법인",9,-3,-2]},{"c":["연결조정",-20,5,-9]},{"c":["연결 합계",428,71,52],"flag":2}]}]}],"pl":[{"type":"hl","html":"2Q 추정 연결: 매출 <b>428억</b> · 영업이익 <b>71억</b> — 단위: 억원, ( )는 음수 · 각 칸 = 매출 / 영업이익"},{"type":"table","title":"부문별 연결 손익","head":["부문","전년 2Q","전년 연간","1Q 실적","4월","5월","6월(추정)","2Q 추정","3Q 계획","4Q 계획","연간 계획"],"rows":[{"c":["합계",[390,52],[1520,198],[384,61],[132,21],[149,26],[147,24],[428,71],[475,88],[513,85],[1820,305]],"flag":2},{"c":["본사 별도",[352,66],[1380,240],[349,70],[118,24],[131,29],[130,26],[379,79],[412,92],[441,89],[1581,330]],"flag":0},{"c":["· 진단사업부",[228,71],[892,196],[241,58],[78,19],[86,23],[82,20],[246,62],[268,70],[287,71],[1042,261]],"flag":1},{"c":["· 바이오소재",[124,-5],[488,44],[108,12],[40,5],[45,6],[48,6],[133,17],[144,22],[154,18],[539,69]],"flag":1},{"c":["미국법인",[41,-11],[162,-48],[49,-6],[18,-1],[19,-2],[17,-1],[54,-4],[68,3],[71,2],[242,-5]],"flag":0},{"c":["중국법인",[18,-1],[71,-6],[19,1],[7,1],[7,1],[7,0],[21,2],[24,1],[26,1],[90,5]],"flag":0},{"c":["베트남법인",[4,-2],[16,-9],[6,-2],[3,-1],[3,-1],[3,-1],[9,-3],[11,-1],[12,-1],[38,-7]],"flag":0},{"c":["연결조정",[-25,-9],[-109,21],[-39,-2],[-14,-2],[-9,-1],[-10,0],[-20,5],[-40,-7],[-37,-6],[-131,-18]],"flag":0}],"note":"6월은 추정치 · 연결조정은 내부거래 제거분"}],"prod":[{"type":"table","title":"제품군별 손익 (본사 별도)","desc":"각 칸 = 매출 / 영업이익 (억원)","head":["제품군","전년 2Q","전년 연간","1Q","2Q","연간 계획"],"rows":[{"c":["합계",[352,66],[1380,240],[349,70],[379,79],[1581,330]],"flag":2},{"c":["진단 · 장비",[86,29],[334,88],[92,26],[97,28],[402,118]],"flag":1},{"c":["진단 · 시약",[104,38],[416,96],[118,29],[123,32],[518,131]],"flag":1},{"c":["진단 · 서비스",[38,4],[142,12],[31,3],[26,2],[122,12]],"flag":1},{"c":["진단 소계",[228,71],[892,196],[241,58],[246,62],[1042,261]],"flag":0},{"c":["소재 · 원료",[71,-2],[286,28],[62,8],[74,11],[302,42]],"flag":1},{"c":["소재 · 부자재",[42,-4],[164,9],[38,3],[47,5],[190,21]],"flag":1},{"c":["소재 · 기타",[11,1],[38,7],[8,1],[12,1],[47,6]],"flag":1},{"c":["소재 소계",[124,-5],[488,44],[108,12],[133,17],[539,69]],"flag":0}]}],"corp":[{"type":"tabs","tabs":[{"label":"🇺🇸 미국법인","sections":[{"type":"hl","text":"미국법인 — 신제품 라인 확대와 판관비 효율화로 3분기부터 영업이익 흑자 전환 계획."},{"type":"table","title":"분기별 손익","desc":"단위: 백만원 · 전년 실적 vs 당해 실적/계획","head":["구분","전년 1Q","2Q","3Q","4Q","전년 계","당해 1Q","2Q","3Q(계획)","4Q(계획)","당해 계"],"rows":[{"c":["Ⅰ. 매출액",3820,4110,4260,4520,16710,4880,5410,6820,7130,24240],"flag":null},{"c":["Ⅱ. 매출원가",2140,2380,2510,2690,9720,2760,3040,3810,3980,13590],"flag":null},{"c":["Ⅲ. 매출총이익",1680,1730,1750,1830,6990,2120,2370,3010,3150,10650],"flag":null},{"c":["Ⅳ. 판매관리비",2790,2840,2910,2980,11520,2740,2760,2720,2960,11180],"flag":null},{"c":["Ⅴ. 영업이익",-1110,-1110,-1160,-1150,-4530,-620,-390,290,190,-530],"flag":2},{"c":["매출총이익률 (%)","44%","42%","41%","40%","42%","43%","44%","44%","44%","44%"],"flag":1},{"c":["영업이익률 (%)","-29%","-27%","-27%","-25%","-27%","-13%","-7%","4%","3%","-2%"],"flag":1}]}]},{"label":"🇨🇳 중국법인","sections":[{"type":"hl","text":"중국법인 — 대리점 재편 이후 매출 회복, 2분기 흑자 유지."},{"type":"table","title":"분기별 손익","desc":"단위: 백만원 · 전년 실적 vs 당해 실적/계획","head":["구분","전년 1Q","2Q","3Q","4Q","전년 계","당해 1Q","2Q","3Q(계획)","4Q(계획)","당해 계"],"rows":[{"c":["Ⅰ. 매출액",1620,1780,1840,1910,7150,1880,2060,2340,2510,8790],"flag":null},{"c":["Ⅱ. 매출원가",1180,1290,1310,1370,5150,1310,1420,1600,1720,6050],"flag":null},{"c":["Ⅲ. 매출총이익",440,490,530,540,2000,570,640,740,790,2740],"flag":null},{"c":["Ⅳ. 판매관리비",470,510,540,550,2070,490,510,560,600,2160],"flag":null},{"c":["Ⅴ. 영업이익",-30,-20,-10,-10,-70,80,130,180,190,580],"flag":2},{"c":["매출총이익률 (%)","27%","28%","29%","28%","28%","30%","31%","32%","31%","31%"],"flag":1},{"c":["영업이익률 (%)","-2%","-1%","-1%","-1%","-1%","4%","6%","8%","8%","7%"],"flag":1}]}]},{"label":"🇻🇳 베트남법인","sections":[{"type":"hl","text":"베트남법인 — 하반기 현지 생산 개시 예정, 상반기는 판관비 중심."},{"type":"table","title":"분기별 손익","desc":"단위: 백만원 · 전년 실적 vs 당해 실적/계획","head":["구분","전년 1Q","2Q","3Q","4Q","전년 계","당해 1Q","2Q","3Q(계획)","4Q(계획)","당해 계"],"rows":[{"c":["Ⅰ. 매출액",0,0,120,180,300,240,310,620,780,1950],"flag":null},{"c":["Ⅱ. 매출원가",0,0,90,140,230,190,240,470,590,1490],"flag":null},{"c":["Ⅲ. 매출총이익",0,0,30,40,70,50,70,150,190,460],"flag":null},{"c":["Ⅳ. 판매관리비",210,230,240,250,930,220,230,240,250,940],"flag":null},{"c":["Ⅴ. 영업이익",-210,-230,-210,-210,-860,-170,-160,-90,-60,-480],"flag":2},{"c":["매출총이익률 (%)","0%","0%","25%","22%","23%","21%","23%","24%","24%","24%"],"flag":1},{"c":["영업이익률 (%)","0%","0%","-175%","-117%","-287%","-71%","-52%","-15%","-8%","-25%"],"flag":1}]}]}]}],"cost":[{"type":"hl","text":"당월 기준 — 제조: 노무비 23백만 증가·경비 29백만 감소(전년 4Q 월평균 대비) / 판관: 17백만 감소, 연구비 7백만 증가"},{"type":"duo","left":[{"type":"table","title":"제조 비용 (월평균 비교)","desc":"단위: 백만원","head":["항목","전년 연간","전년 4Q평균(A)","1Q평균","전월","당월(B)","B−A"],"rows":[{"c":["노무비 · 급여",6820,568,594,612,580,12],"flag":1},{"c":["노무비 · 용역급여",4210,351,368,359,362,11],"flag":1},{"c":["노무비 소계",11030,919,962,971,942,23],"flag":0},{"c":["경비 · 소모품",5940,495,470,488,462,-33],"flag":1},{"c":["경비 · 감가상각비",3610,301,298,304,309,8],"flag":1},{"c":["경비 · 지급수수료",1780,148,141,139,162,14],"flag":1},{"c":["경비 · 전력비",860,72,68,74,63,-9],"flag":1},{"c":["경비 · 기타",1120,93,88,96,84,-9],"flag":1},{"c":["경비 소계",13310,1109,1065,1101,1080,-29],"flag":0},{"c":["합계",24340,2028,2027,2072,2022,-6],"flag":2}],"note":"주요 사유 · 소모품: 원자재 전환으로 감소 · 지급수수료: 설비 보수 일시 증가 · 전력: 사용량 감소"}],"right":[{"type":"table","title":"판관·연구 비용 (월평균 비교)","desc":"단위: 백만원 · 주요 항목","head":["항목","전년 연간","전년 2Q평균(A)","당해 계획","1Q평균","전월","당월(B)","B−A"],"rows":[{"c":["판관 · 급여",7240,604,8420,690,672,668,64],"flag":1},{"c":["판관 · 광고",620,78,810,42,31,24,-54],"flag":1},{"c":["판관 · 지급수수료",2410,186,2260,214,168,172,-14],"flag":1},{"c":["판관 · 기타",2980,242,3210,251,238,229,-13],"flag":1},{"c":["판관 소계",13250,1110,14700,1197,1109,1093,-17],"flag":0},{"c":["연구 · 일반",9840,812,10420,864,902,838,26],"flag":1},{"c":["연구 · 위탁",1620,131,1980,148,96,112,-19],"flag":1},{"c":["연구소 소계",11460,943,12400,1012,998,950,7],"flag":0},{"c":["합계",24710,2053,27100,2209,2107,2043,-10],"flag":2}],"note":"주요 사유 · 급여: 인원 증가 · 광고: 학회 일정 차이 · 위탁: 분기 집중 발생"}]}],"cash":[{"type":"hl","html":"자금 보유 <b>1,240억</b> — 원화 380억 + 외화 860억"},{"type":"kpi","items":[{"l":"원화","v":"380억","s":"MMF·정기예금·수시입출"},{"l":"외화","v":"860억","s":"USD 중심 · 평균 3.8%"},{"l":"당월 수입","v":"164억","s":"수금 158 + 기타 6"},{"l":"당월 지출","v":"121억","s":"경상 92 + 투자 29"}]},{"type":"table","title":"월별 자금 집행 (Cash Flow)","desc":"단위: 억원","head":["구분","전년 누적","당해 누계","1월","2월","3월","4월","5월","6월"],"rows":[{"c":["수금",842,516,71,68,94,58,67,158],"flag":1},{"c":["기타 수입",196,74,12,9,18,14,15,6],"flag":1},{"c":["수입 계",1038,590,83,77,112,72,82,164],"flag":0},{"c":["경상비",714,468,74,71,79,76,76,92],"flag":1},{"c":["투자자산",318,142,12,8,41,29,23,29],"flag":1},{"c":["지출 계",1032,610,86,79,120,105,99,121],"flag":0},{"c":["Net Cash-in",6,-20,-3,-2,-8,-33,-17,43],"flag":2},{"c":["잔액",1260,1240,1257,1255,1247,1214,1197,1240],"flag":2}],"note":"계좌·상품별 상세(기관/금리/만기)는 보안상 제외 — 원본 보고서 참조"}],"inv":[{"type":"table","title":"재고자산 현황","desc":"단위: 백만원","head":["구분","전전년","전년(A)","당월(B)","증감","충당금","실질 전년","실질 당월","폐기"],"rows":[{"c":["원자재",31820,28640,27910,-730,22140,5210,4980,68]},{"c":["부자재",4210,3180,3420,240,1290,1740,2130,42]},{"c":["반제품",18640,17920,18240,320,6480,11190,11760,310]},{"c":["상품",1240,1680,2140,460,120,1520,2020,24]},{"c":["제품",2980,3240,3860,620,180,3010,3680,96]},{"c":["합계",58890,54660,55570,910,30210,22670,24570,540],"flag":2}],"note":"비고 · 반제품: 신제품 라인 선행 생산 · 상품: 신규 장비 입고 · 제품: 하반기 출하 대비 비축"}],"ar":[{"type":"duo","left":[{"type":"table","title":"매출채권 · 대손충당금","desc":"단위: 억원","head":["구분","채권","충당(A)","충당(B)","분기 상각","비고"],"rows":[{"c":["해외 합계",184,18,21,3,""],"flag":0},{"c":["· 미국법인",52,6,9,3,"장기 채권 11.2억"],"flag":1},{"c":["· 중국법인",21,2,2,0,""],"flag":1},{"c":["· 해외 대리점",111,10,10,0,"결제조건 60~150일"],"flag":1},{"c":["국내 합계",92,null,null,null,"결제조건 90일"],"flag":0},{"c":["· 대형 유통사",48,null,null,null,"기한경과 없음"],"flag":1},{"c":["· 병원·기관",44,null,null,null,"기한경과 2.4억"],"flag":1},{"c":["TOTAL",276,18,21,3,"전년말 충당 16억"],"flag":2}],"note":"국내 기한경과 채권은 분기 내 회수 예정"}],"right":[{"type":"table","title":"주요 채무 (AP)","desc":"단위: 억원","head":["구분","잔액"],"rows":[{"c":["외상매입금 (원화 34.8 + 외화 2.1)",36.9]},{"c":["미지급금",6.3]},{"c":["합계",43.2],"flag":2}]},{"type":"table","title":"거래처 잔액 Top 5","desc":"단위: 억원","head":["거래처","잔액"],"rows":[{"c":["A상사",12.4]},{"c":["B케미칼",8.1]},{"c":["C테크",5.6]},{"c":["D머티리얼즈",3.2]},{"c":["E솔루션",2.4]},{"c":["합계",31.7],"flag":2}]}]}]}}/*__DATA_END__*/;
+
+const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+// 숫자: 음수는 회계식 (1,234) 빨강. 문자열이면 그대로 표시(단위·기호 포함 가능)
+function num(v){
+  if(v==null||v==='') return '';
+  if(typeof v==='string') return esc(v);
+  return v<0?'<span class="neg">('+Math.abs(v).toLocaleString()+')</span>':v.toLocaleString();
+}
+// 한 칸에 두 값 병기(예: 매출/영업이익)
+const pair=a=>(!a||(a[0]==null&&a[1]==null))?'':(num(a[0])+' / '+num(a[1]));
+const cell=v=>Array.isArray(v)?pair(v):num(v);
+const rowCls=f=>f===1?'sub':(f===2?'tot':(f===0?'sec':''));
+
+function secHTML(s){
+  if(!s) return '';
+  switch(s.type){
+    case 'hl':   return '<div class="hl">'+(s.html||esc(s.text))+'</div>';
+    case 'kpi':  return '<div class="kgrid">'+(s.items||[]).map(k=>
+                   '<div class="kpi"><div class="l">'+esc(k.l)+'</div><div class="v">'+esc(k.v)+'</div><div class="s">'+(k.sHtml||esc(k.s||''))+'</div></div>').join('')+'</div>';
+    case 'table':return card(s, tableHTML(s));
+    case 'bars': return card(s, barsHTML(s));
+    case 'duo':  return '<div class="duo"><div>'+(s.left||[]).map(secHTML).join('')+'</div><div>'+(s.right||[]).map(secHTML).join('')+'</div></div>';
+    case 'tabs': return tabsHTML(s);
+    default:     return '';
+  }
+}
+function card(s,inner){
+  return '<div class="card">'+(s.title?'<h2>'+esc(s.title)+'</h2>':'')
+    +(s.desc?'<div class="desc">'+esc(s.desc)+'</div>':'')+inner
+    +(s.note?'<div class="note">'+(s.noteHtml||esc(s.note))+'</div>':'')+'</div>';
+}
+function tableHTML(s){
+  const head=(s.head||[]).map(h=>'<th>'+esc(h)+'</th>').join('');
+  const body=(s.rows||[]).map(r=>{
+    const c=Array.isArray(r)?r:r.c||[];
+    const tds=c.map((v,i)=>'<td>'+(i===0?'<b>'+esc(v)+'</b>':cell(v))+'</td>').join('');
+    return '<tr'+(rowCls(Array.isArray(r)?null:r.flag)?' class="'+rowCls(r.flag)+'"':'')+'>'+tds+'</tr>';
+  }).join('');
+  return '<div class="tscroll"><table class="t">'+(head?'<tr>'+head+'</tr>':'')+body+'</table></div>';
+}
+function barsHTML(s){
+  const ser=s.series||[], lg=s.legend||[], col=s.colors||['#2563eb','#16a34a'];
+  let mx=1; ser.forEach(r=>r.slice(1).forEach(v=>{ if(typeof v==='number') mx=Math.max(mx,Math.abs(v)); }));
+  const cols=ser.map(r=>{
+    const vals=r.slice(1);
+    return '<div class="mcol"><div class="vv">'+vals.map(v=>num(v)).join(' / ')+'</div><div class="bars">'
+      +vals.map((v,i)=>'<div class="b" style="height:'+Math.max(3,Math.round(Math.max(v,0)/mx*88))+'px;background:'+(col[i]||'#94a3b8')+'"></div>').join('')
+      +'</div><div class="lb">'+esc(r[0])+'</div></div>';
+  }).join('');
+  const legend=lg.length?'<div class="lgd">'+lg.map((t,i)=>'<i style="background:'+(col[i]||'#94a3b8')+'"></i>'+esc(t)).join('<br>')+'</div>':'';
+  return '<div class="mini">'+cols+legend+'</div>';
+}
+function tabsHTML(s){
+  const id='tb'+Math.random().toString(36).slice(2,8);
+  const btns=(s.tabs||[]).map((t,i)=>'<button class="tab'+(i===0?' on':'')+'" data-i="'+i+'">'+esc(t.label)+'</button>').join('');
+  const bodies=(s.tabs||[]).map((t,i)=>'<div data-i="'+i+'" style="display:'+(i===0?'block':'none')+'">'+(t.sections||[]).map(secHTML).join('')+'</div>').join('');
+  setTimeout(()=>{ const el=document.getElementById(id); if(!el)return;
+    el.addEventListener('click',e=>{ const b=e.target.closest('.tab'); if(!b)return;
+      el.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));
+      el.querySelectorAll('[data-i][style]').forEach(d=>{ d.style.display=(d.dataset.i===b.dataset.i)?'block':'none'; }); });
+  },0);
+  return '<div id="'+id+'"><div class="tabrow">'+btns+'</div>'+bodies+'</div>';
+}
+
+function render(){
+  const D=DATA;
+  if(!D){ document.getElementById('wrap').innerHTML='<div class="hl">데이터가 없습니다. <b>node tools/build.js data/파일.json</b> 으로 생성하세요.</div>'; return; }
+  const M=D.meta||{};
+  document.title=(M.title||'월간 재무보고')+(M.period?(' · '+M.period):'');
+  document.getElementById('bd-title').textContent=M.title||'월간 재무보고';
+  document.getElementById('bd-org').textContent=M.org||'';
+  document.getElementById('hd-sub').textContent=M.subtitle||'';
+  document.getElementById('hd-period').textContent='📅 '+(M.period||'');
+  document.getElementById('foot-basis').textContent=M.basis||'';
+  document.getElementById('foot-conf').textContent=M.confidential||'FOR INTERNAL USE ONLY';
+  // 메뉴 + 페이지
+  const menu=D.menu||[], nav=document.getElementById('nav'), wrap=document.getElementById('wrap');
+  nav.innerHTML=menu.map((m,i)=>(m.group?'<div class="grp">'+esc(m.group)+'</div>':'')
+    +'<a data-p="'+esc(m.id)+'"'+(i===0||m.first?' class="on"':'')+'>'+esc((m.icon?m.icon+' ':'')+m.label)+'</a>').join('');
+  wrap.innerHTML=menu.map((m,i)=>'<section class="page'+(i===0?' on':'')+'" id="page-'+esc(m.id)+'">'
+    +((D.pages||{})[m.id]||[]).map(secHTML).join('')+'</section>').join('');
+  const first=menu[0]; if(first) document.getElementById('pg-title').textContent=first.label;
+  nav.addEventListener('click',e=>{ const a=e.target.closest('a[data-p]'); if(!a)return;
+    nav.querySelectorAll('a').forEach(x=>x.classList.toggle('on',x===a));
+    wrap.querySelectorAll('.page').forEach(p=>p.classList.toggle('on',p.id==='page-'+a.dataset.p));
+    const mm=menu.find(x=>x.id===a.dataset.p); document.getElementById('pg-title').textContent=mm?mm.label:'';
+    window.scrollTo(0,0); });
+}
+render();
+</script>
+</body>
+</html>
